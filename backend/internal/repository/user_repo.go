@@ -41,6 +41,11 @@ func (r *userRepository) IsEnabled(ctx context.Context, userID int64) (bool, err
 	return enabled, err
 }
 
+func (r *userRepository) SetAccountShareEnabled(ctx context.Context, userID int64, enabled bool) error {
+	_, err := r.sql.ExecContext(ctx, `UPDATE users SET account_share_enabled = $1, updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL`, enabled, userID)
+	return err
+}
+
 var _ service.RedeemUserAdjustmentRepository = (*userRepository)(nil)
 
 func NewUserRepository(client *dbent.Client, sqlDB *sql.DB) service.UserRepository {

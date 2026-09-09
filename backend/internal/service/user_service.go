@@ -181,6 +181,19 @@ type UserRepository interface {
 	DisableTotp(ctx context.Context, userID int64) error
 }
 
+// accountShareToggleRepository is optional so existing repository test doubles
+// remain source-compatible while deployments can expose the customer gate.
+type accountShareToggleRepository interface {
+	SetAccountShareEnabled(ctx context.Context, userID int64, enabled bool) error
+}
+
+// SetAccountShareEnabled updates the admin-controlled customer feature gate.
+func (s *UserService) SetAccountShareEnabled(ctx context.Context, userID int64, enabled bool) error {
+	r, ok := s.userRepo.(accountShareToggleRepository)
+	if !ok { return fmt.Errorf("account share toggle is unavailable") }
+	return r.SetAccountShareEnabled(ctx, userID, enabled)
+}
+
 // RegistrationEmailDomainRepository 是生产用户仓储为非白名单域名单账户兜底策略提供的可选能力。
 // 它独立于 UserRepository，避免无关测试桩和服务消费者实现注册专用方法。
 type RegistrationEmailDomainRepository interface {

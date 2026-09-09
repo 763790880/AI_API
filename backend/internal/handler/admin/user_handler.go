@@ -86,6 +86,7 @@ type UpdateUserRequest struct {
 	// GroupRates 用户专属分组倍率配置
 	// map[groupID]*rate，nil 表示删除该分组的专属倍率
 	GroupRates map[int64]*float64 `json:"group_rates"`
+	AccountShareEnabled *bool `json:"account_share_enabled"`
 }
 
 // UpdateBalanceRequest represents balance update request
@@ -358,6 +359,12 @@ func (h *UserHandler) Update(c *gin.Context) {
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
+	}
+	if req.AccountShareEnabled != nil && h.userService != nil {
+		if err := h.userService.SetAccountShareEnabled(c.Request.Context(), userID, *req.AccountShareEnabled); err != nil {
+			response.Error(c, 500, err.Error())
+			return
+		}
 	}
 
 	response.Success(c, dto.UserFromServiceAdmin(user))
