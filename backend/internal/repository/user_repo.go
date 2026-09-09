@@ -32,6 +32,15 @@ type userRepository struct {
 	sql    sqlExecutor
 }
 
+// IsEnabled implements the account-sharing customer feature gate. The column
+// is introduced by migration 232 and defaults to false for existing users.
+func (r *userRepository) IsEnabled(ctx context.Context, userID int64) (bool, error) {
+	var enabled bool
+	err := r.sql.QueryRowContext(ctx, `SELECT account_share_enabled FROM users WHERE id = $1 AND deleted_at IS NULL`, userID).Scan(&enabled)
+	if errors.Is(err, sql.ErrNoRows) { return false, nil }
+	return enabled, err
+}
+
 var _ service.RedeemUserAdjustmentRepository = (*userRepository)(nil)
 
 func NewUserRepository(client *dbent.Client, sqlDB *sql.DB) service.UserRepository {

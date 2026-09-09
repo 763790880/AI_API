@@ -330,7 +330,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	handlerWithdrawalHandler := handler.NewWithdrawalHandler(withdrawalService)
 	accountShareRoomRepository := repository.NewAccountShareRoomRepository(db)
 	accountShareMembershipRepository := repository.NewAccountShareMembershipRepository(db)
-	accountShareModeService := service.NewAccountShareModeService(accountShareRoomRepository, accountShareMembershipRepository, redisClient)
+	accountShareModeService := service.NewAccountShareModeService(accountShareRoomRepository, accountShareMembershipRepository, redisClient, userRepository)
 	accountShareModeHandler := handler.NewAccountShareModeHandler(accountShareModeService)
 	accountShareLifecycleHandler := handler.NewAccountShareLifecycleHandler(accountShareModeService)
 	idempotencyCoordinator := service.ProvideIdempotencyCoordinator(idempotencyRepository, configConfig)

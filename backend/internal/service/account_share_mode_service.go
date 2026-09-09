@@ -20,6 +20,7 @@ var (
 	ErrRoomQueueFull        = infraerrors.Conflict("ROOM_QUEUE_FULL", "share room queue is full")
 	ErrMembershipNotFound   = infraerrors.NotFound("MEMBERSHIP_NOT_FOUND", "share membership not found")
 	ErrMembershipNotOwner   = infraerrors.Forbidden("MEMBERSHIP_NOT_OWNER", "operation not allowed for this actor")
+	ErrAccountShareDisabled = infraerrors.Forbidden("ACCOUNT_SHARE_DISABLED", "account sharing is not enabled for this customer")
 )
 
 // AccountShareRoom 账号广场房间领域对象。
@@ -74,16 +75,33 @@ type AccountShareMembershipRepository interface {
 	ListByRoom(ctx context.Context, roomID int64) ([]AccountShareMembership, error)
 }
 
+// AccountShareAccessRepository controls the customer-level feature gate.
+// Implementations must fail closed when the user is missing or disabled.
+type AccountShareAccessRepository interface {
+	IsEnabled(ctx context.Context, userID int64) (bool, error)
+}
+
 // AccountShareModeService 提供账号广场房间与会员业务能力。
 type AccountShareModeService struct {
 	roomRepo       AccountShareRoomRepository
 	membershipRepo AccountShareMembershipRepository
 	rc             *redis.Client
+	accessRepo     AccountShareAccessRepository
 }
 
 // NewAccountShareModeService 构造广场服务。
-func NewAccountShareModeService(roomRepo AccountShareRoomRepository, membershipRepo AccountShareMembershipRepository, rc *redis.Client) *AccountShareModeService {
-	return &AccountShareModeService{roomRepo: roomRepo, membershipRepo: membershipRepo, rc: rc}
+func NewAccountShareModeService(roomRepo AccountShareRoomRepository, membershipRepo AccountShareMembershipRepository, rc *redis.Client, access ...AccountShareAccessRepository) *AccountShareModeService {
+	var accessRepo AccountShareAccessRepository
+	if len(access) > 0 { accessRepo = access[0] }
+	return &AccountShareModeService{roomRepo: roomRepo, membershipRepo: membershipRepo, rc: rc, accessRepo: accessRepo}
+}
+
+func (s *AccountShareModeService) requireEnabled(ctx context.Context, userID int64) error {
+	if s.accessRepo == nil { return ErrAccountShareDisabled }
+	ok, err := s.accessRepo.IsEnabled(ctx, userID)
+	if err != nil { return err }
+	if !ok { return ErrAccountShareDisabled }
+	return nil
 }
 
 // CreateRoom 号主为自己托管的账号创建广场房间（account_id 唯一）。
@@ -91,6 +109,7 @@ func (s *AccountShareModeService) CreateRoom(ctx context.Context, ownerID, accou
 	if s == nil || s.roomRepo == nil {
 		return nil, fmt.Errorf("account share mode service room repo is nil")
 	}
+	if err := s.requireEnabled(ctx, ownerID); err != nil { return nil, err }
 	if existing, err := s.roomRepo.GetByAccountID(ctx, accountID); err != nil {
 		return nil, err
 	} else if existing != nil {
@@ -150,6 +169,7 @@ func (s *AccountShareModeService) UpdateRoom(ctx context.Context, ownerID, roomI
 
 // Join 消费者加入房间（占用一个座位，受 seat_limit 约束）。
 func (s *AccountShareModeService) Join(ctx context.Context, consumerUserID int64, apiKeyID *int64, roomID int64) (*AccountShareMembership, error) {
+	if err := s.requireEnabled(ctx, consumerUserID); err != nil { return nil, err }
 	if s == nil || s.roomRepo == nil || s.membershipRepo == nil {
 		return nil, fmt.Errorf("account share mode service repo is nil")
 	}
@@ -197,6 +217,7 @@ func (s *AccountShareModeService) Join(ctx context.Context, consumerUserID int64
 
 // Queue 满员时消费者进入排队（受 queue_max 约束，默认 2h 过期）。
 func (s *AccountShareModeService) Queue(ctx context.Context, consumerUserID int64, roomID int64) (*AccountShareMembership, error) {
+	if err := s.requireEnabled(ctx, consumerUserID); err != nil { return nil, err }
 	if s == nil || s.roomRepo == nil || s.membershipRepo == nil {
 		return nil, fmt.Errorf("account share mode service repo is nil")
 	}
