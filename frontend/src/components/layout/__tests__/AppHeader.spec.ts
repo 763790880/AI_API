@@ -18,6 +18,12 @@ const localeSwitcherPath = resolve(
 const localeSwitcherSource = readFileSync(localeSwitcherPath, 'utf8')
 
 describe('AppHeader responsive text constraints', () => {
+  it('omits the Discord, GitHub, and onboarding guide navigation entries', () => {
+    expect(componentSource).not.toContain('discord.gg')
+    expect(componentSource).not.toContain('github.com/Wei-Shaw/sub2api')
+    expect(componentSource).not.toContain('onboarding.restartTour')
+  })
+
   it('renders the one-click invite link beside announcements', () => {
     expect(componentSource).toContain('<AnnouncementBell v-if="user" />')
     expect(componentSource).toContain('<HeaderInviteLink v-if="user" />')
