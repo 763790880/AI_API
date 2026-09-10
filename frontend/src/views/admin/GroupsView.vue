@@ -3501,6 +3501,7 @@ import { createStableObjectKeyResolver } from "@/utils/stableObjectKey";
 import { extractApiErrorMessage } from "@/utils/apiError";
 import { useKeyedDebouncedSearch } from "@/composables/useKeyedDebouncedSearch";
 import { getPersistedPageSize } from "@/composables/usePersistedPageSize";
+import { createManagementPageLogger, managementRequestErrorDetails } from "@/utils/managementPageDiagnostics";
 import {
   openAIAccountLevelLabel,
   openAIAccountLevelOptions,
@@ -3907,6 +3908,8 @@ const sortState = reactive({
 });
 
 let abortController: AbortController | null = null;
+let loadRequestSeq = 0;
+const diagnostics = createManagementPageLogger("groups");
 
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
@@ -4443,13 +4446,21 @@ const saveCustomApiKeyBadge = (group: AdminGroup) => {
 };
 
 const loadGroups = async () => {
-  if (abortController) {
+  if (abortController && !abortController.signal.aborted) {
+    diagnostics.info("load-replaced", { request_seq: loadRequestSeq });
     abortController.abort();
   }
+  const requestSeq = ++loadRequestSeq;
+  const startedAt = performance.now();
   const currentController = new AbortController();
   abortController = currentController;
   const { signal } = currentController;
   loading.value = true;
+  diagnostics.info("load-start", {
+    request_seq: requestSeq,
+    page_number: pagination.page,
+    page_size: pagination.page_size,
+  });
   try {
     const response = await adminAPI.groups.list(
       pagination.page,
@@ -4472,6 +4483,12 @@ const loadGroups = async () => {
     groups.value = response.items;
     pagination.total = response.total;
     pagination.pages = response.pages;
+    diagnostics.info("load-success", {
+      request_seq: requestSeq,
+      duration_ms: Math.round(performance.now() - startedAt),
+      item_count: response.items.length,
+      total: response.total,
+    });
     loadUsageSummary();
     loadCapacitySummary();
   } catch (error: any) {
@@ -4480,13 +4497,24 @@ const loadGroups = async () => {
       error?.name === "AbortError" ||
       error?.code === "ERR_CANCELED"
     ) {
+      diagnostics.info("load-canceled", {
+        request_seq: requestSeq,
+        duration_ms: Math.round(performance.now() - startedAt),
+        reason: "page-unmounted-or-request-replaced",
+      });
       return;
     }
+    diagnostics.warn("load-error", {
+      request_seq: requestSeq,
+      duration_ms: Math.round(performance.now() - startedAt),
+      ...managementRequestErrorDetails(error),
+    });
     appStore.showError(t("admin.groups.failedToLoad"));
     console.error("Error loading groups:", error);
   } finally {
-    if (abortController === currentController && !signal.aborted) {
-      loading.value = false;
+    if (abortController === currentController) {
+      abortController = null;
+      if (!signal.aborted) loading.value = false;
     }
   }
 };
@@ -5275,6 +5303,7 @@ const saveSortOrder = async () => {
 };
 
 onMounted(() => {
+  diagnostics.info("mount");
   loadSavedColumns();
   adminSettingsStore.fetch();
   loadGroups();
@@ -5282,6 +5311,12 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  diagnostics.info("unmount", {
+    request_seq: loadRequestSeq,
+    request_active: Boolean(abortController && !abortController.signal.aborted),
+  });
+  abortController?.abort();
+  clearTimeout(searchTimeout);
   document.removeEventListener("click", handleClickOutside);
   accountSearchRunner.clearAll();
   clearAllAccountSearchState();

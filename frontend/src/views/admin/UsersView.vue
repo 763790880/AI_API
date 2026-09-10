@@ -699,6 +699,7 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 import { formatDateTime } from '@/utils/format'
+import { createManagementPageLogger, managementRequestErrorDetails } from '@/utils/managementPageDiagnostics'
 import Icon from '@/components/icons/Icon.vue'
 
 const { t } = useI18n()
@@ -1043,6 +1044,9 @@ const editingUser = ref<AdminUser | null>(null)
 const deletingUser = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)
 let abortController: AbortController | null = null
+let disposed = false
+let loadRequestSeq = 0
+const diagnostics = createManagementPageLogger('users')
 let secondaryDataSeq = 0
 
 const loadUsersSecondaryData = async (
@@ -1238,11 +1242,25 @@ const handleAttributesModalClose = async () => {
 }
 
 const loadUsers = async () => {
-  abortController?.abort()
+  if (disposed) {
+    diagnostics.info('load-skipped', { reason: 'page-disposed' })
+    return
+  }
+  if (abortController && !abortController.signal.aborted) {
+    diagnostics.info('load-replaced', { request_seq: loadRequestSeq })
+    abortController.abort()
+  }
+  const requestSeq = ++loadRequestSeq
+  const startedAt = performance.now()
   const currentAbortController = new AbortController()
   abortController = currentAbortController
   const { signal } = currentAbortController
   loading.value = true
+  diagnostics.info('load-start', {
+    request_seq: requestSeq,
+    page_number: pagination.page,
+    page_size: pagination.page_size
+  })
   try {
     // Build attribute filters from active filters
     const attrFilters: Record<number, string> = {}
@@ -1273,6 +1291,12 @@ const loadUsers = async () => {
     users.value = response.items
     pagination.total = response.total
     pagination.pages = response.pages
+    diagnostics.info('load-success', {
+      request_seq: requestSeq,
+      duration_ms: Math.round(performance.now() - startedAt),
+      item_count: response.items.length,
+      total: response.total
+    })
     usageStats.value = {}
     userAttributeValues.value = {}
 
@@ -1287,14 +1311,25 @@ const loadUsers = async () => {
     }
   } catch (error: any) {
     const errorInfo = error as { name?: string; code?: string }
-    if (errorInfo?.name === 'AbortError' || errorInfo?.name === 'CanceledError' || errorInfo?.code === 'ERR_CANCELED') {
+    if (signal.aborted || errorInfo?.name === 'AbortError' || errorInfo?.name === 'CanceledError' || errorInfo?.code === 'ERR_CANCELED') {
+      diagnostics.info('load-canceled', {
+        request_seq: requestSeq,
+        duration_ms: Math.round(performance.now() - startedAt),
+        reason: disposed ? 'page-unmounted' : 'request-replaced'
+      })
       return
     }
+    diagnostics.warn('load-error', {
+      request_seq: requestSeq,
+      duration_ms: Math.round(performance.now() - startedAt),
+      ...managementRequestErrorDetails(error)
+    })
     const message = error.response?.data?.detail || error.message || t('admin.users.failedToLoad')
     appStore.showError(message)
     console.error('Error loading users:', error)
   } finally {
     if (abortController === currentAbortController) {
+      abortController = null
       loading.value = false
     }
   }
@@ -1533,7 +1568,12 @@ const handleScroll = () => {
 }
 
 onMounted(async () => {
+  diagnostics.info('mount-start')
   await loadAttributeDefinitions()
+  if (disposed) {
+    diagnostics.info('mount-canceled', { reason: 'page-unmounted-during-initialization' })
+    return
+  }
   loadSavedFilters()
   loadSavedColumns()
   loadUsers()
@@ -1545,6 +1585,11 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  disposed = true
+  diagnostics.info('unmount', {
+    request_seq: loadRequestSeq,
+    request_active: Boolean(abortController && !abortController.signal.aborted)
+  })
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('scroll', handleScroll, true)
   clearTimeout(searchTimeout)
