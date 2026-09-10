@@ -24,7 +24,10 @@ services:
   # Sub2API Application
   # ===========================================================================
   sub2api:
-    image: ghcr.io/pixel-api/pixelapi:latest
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ${SUB2API_IMAGE:-ai-api:local}
     container_name: sub2api
     restart: unless-stopped
     ulimits:
