@@ -1587,7 +1587,7 @@ func (s *OpenAIGatewayService) selectAccountShareModeBoundAccount(
 		boundImageCapability = OpenAIImagesCapabilityBasic
 	}
 	reqCtx, ok := AccountShareModeRequestFromContext(ctx)
-	if !ok {
+	if !ok || reqCtx.UserID <= 0 || reqCtx.APIKeyID <= 0 {
 		return nil, decision, true, ErrAccountShareModeGroupUnbound
 	}
 	var membership *AccountShareMembership
@@ -1597,10 +1597,13 @@ func (s *OpenAIGatewayService) selectAccountShareModeBoundAccount(
 	var err error
 	membership, listing, err = s.accountShareModeService.ResolveActiveBindingForRequest(ctx, reqCtx.UserID, reqCtx.APIKeyID, *groupID)
 	if err != nil {
+		if errors.Is(err, ErrAccountShareModeGroupUnbound) || errors.Is(err, ErrAccountShareListingNotFound) {
+			return nil, decision, false, nil
+		}
 		return nil, decision, true, err
 	}
 	if membership == nil || listing == nil {
-		return nil, decision, true, ErrAccountShareModeGroupUnbound
+		return nil, decision, false, nil
 	}
 	accountID := membership.AccountID
 	if accountID <= 0 {

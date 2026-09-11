@@ -3108,6 +3108,7 @@ func (s *OpenAIGatewayService) RevalidateSelectedOpenAIAccountForDispatch(
 	}
 
 	isModeGroup := false
+	unboundModeGroup := false
 	if groupID != nil && *groupID > 0 && s.accountShareModeService != nil {
 		var modeErr error
 		isModeGroup, modeErr = s.accountShareModeService.IsModeGroupChecked(ctx, *groupID)
@@ -3117,20 +3118,25 @@ func (s *OpenAIGatewayService) RevalidateSelectedOpenAIAccountForDispatch(
 	}
 	if isModeGroup {
 		requestCtx, ok := AccountShareModeRequestFromContext(ctx)
-		if !ok {
+		if !ok || requestCtx.UserID <= 0 || requestCtx.APIKeyID <= 0 {
 			return nil, ErrAccountShareModeGroupUnbound
 		}
 		// Use a fresh request state so a long-lived WebSocket cannot reuse the
 		// membership cached during its first turn after that membership ends.
 		freshBindingCtx := WithAccountShareModeRequest(ctx, requestCtx.UserID, requestCtx.APIKeyID)
 		membership, listing, err := s.accountShareModeService.ResolveActiveBindingForRequest(freshBindingCtx, requestCtx.UserID, requestCtx.APIKeyID, *groupID)
-		if err != nil {
+		if errors.Is(err, ErrAccountShareModeGroupUnbound) || errors.Is(err, ErrAccountShareListingNotFound) {
+			// The ordinary pool is available only to authenticated, unbound keys.
+			// Recheck the latest account below so room/private accounts cannot leak.
+			isModeGroup = false
+			unboundModeGroup = true
+		} else if err != nil {
 			return nil, err
 		}
-		if membership == nil || listing == nil || membership.AccountID != account.ID {
+		if isModeGroup && (membership == nil || listing == nil || membership.AccountID != account.ID) {
 			return nil, ErrAccountShareModeGroupUnbound
 		}
-		if requirements.RequestedModel != "" &&
+		if isModeGroup && requirements.RequestedModel != "" &&
 			(!accountShareListingAllowsModel(listing, requirements.RequestedModel) ||
 				!accountShareRoomModelIsPriced(ctx, s.channelService, listing.Platform, requirements.RequestedModel)) {
 			return nil, accountShareModeUnsupportedModelError(requirements.RequestedModel)
@@ -3151,6 +3157,9 @@ func (s *OpenAIGatewayService) RevalidateSelectedOpenAIAccountForDispatch(
 	}
 	if latest == nil || latest.ID != account.ID {
 		return nil, fmt.Errorf("revalidate selected OpenAI account: repository returned an invalid account for id %d", account.ID)
+	}
+	if unboundModeGroup && (latest.OwnerUserID != nil || latest.AccountShareModeListingID != nil) {
+		return nil, ErrAccountShareModeGroupUnbound
 	}
 	if reason := openAIContinuationRestartRequiredReason(latest, requirements.RequestedModel, requirements.RequireCompact, false, time.Now()); reason != "" {
 		return nil, newOpenAIDispatchAccountUnavailableError(
