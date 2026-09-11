@@ -9878,7 +9878,7 @@ func (e *OpenAIFastBlockedError) Error() string { return e.Message }
 //
 // Matching rules:
 //   - Scope filters by account type (all / oauth / apikey / bedrock)
-//   - UserIDs, when present, filters by the trusted authenticated Sub2API user
+//   - UserIDs, when present, filters by the trusted authenticated CCAPI user
 //   - ServiceTier must be empty (= any), "all", or equal the normalized tier
 //   - ModelWhitelist narrows the rule to specific models; FallbackAction
 //     handles the non-matching case (default: pass)

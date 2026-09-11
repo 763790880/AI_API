@@ -623,13 +623,13 @@ func (s *PaymentService) buildPaymentSubject(req CreateOrderRequest, plan *dbent
 		if plan.ProductName != "" {
 			return plan.ProductName
 		}
-		return "Sub2API Subscription " + plan.Name
+		return "CCAPI Subscription " + plan.Name
 	}
 	if req.OrderType == payment.OrderTypeShop {
 		if subject := strings.TrimSpace(req.Subject); subject != "" {
 			return subject
 		}
-		return "Sub2API Store Order"
+		return "CCAPI Store Order"
 	}
 	currency := payment.DefaultPaymentCurrency
 	if sel != nil {
@@ -641,7 +641,7 @@ func (s *PaymentService) buildPaymentSubject(req CreateOrderRequest, plan *dbent
 	if pf != "" || sf != "" {
 		return strings.TrimSpace(pf + " " + amountStr + " " + sf)
 	}
-	return "Sub2API " + amountStr + " " + currency
+	return "CCAPI " + amountStr + " " + currency
 }
 
 func (s *PaymentService) maybeBuildWeChatOAuthRequiredResponse(ctx context.Context, req CreateOrderRequest, amount, payAmount, feeRate float64) (*CreateOrderResponse, error) {

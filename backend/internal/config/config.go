@@ -308,7 +308,7 @@ type OIDCConnectConfig struct {
 	UserInfoUsernamePath string `mapstructure:"userinfo_username_path"`
 }
 
-// OIDCProviderConfig configures Sub2API as an OpenID Connect Provider.
+// OIDCProviderConfig configures CCAPI as an OpenID Connect Provider.
 // Client secrets are never stored in plaintext: SecretSHA256 must contain the
 // lowercase or uppercase hexadecimal SHA-256 digest of the client secret.
 type OIDCProviderConfig struct {
@@ -2135,7 +2135,7 @@ func setDefaults() {
 	viper.SetDefault("oidc_connect.userinfo_id_path", "")
 	viper.SetDefault("oidc_connect.userinfo_username_path", "")
 
-	// OIDC Provider (Sub2API acts as the identity provider)
+	// OIDC Provider (CCAPI acts as the identity provider)
 	viper.SetDefault("oidc_provider.enabled", false)
 	viper.SetDefault("oidc_provider.issuer", "")
 	viper.SetDefault("oidc_provider.frontend_authorize_url", "")

@@ -69,7 +69,7 @@ import { sanitizeUrl } from '@/utils/url'
 const appStore = useAppStore()
 const authStore = useAuthStore()
 const { t } = useI18n()
-const siteName = computed(() => appStore.siteName || 'Sub2API')
+const siteName = computed(() => appStore.siteName || 'CCAPI')
 const dashboardPath = computed(() => (authStore.isAdmin ? '/admin/dashboard' : '/dashboard'))
 const siteLogo = computed(() =>
   sanitizeUrl(appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }),

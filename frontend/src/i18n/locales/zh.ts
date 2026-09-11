@@ -188,8 +188,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: "Sub2API 安装向导",
-    description: "配置您的 Sub2API 实例",
+    title: "CCAPI 安装向导",
+    description: "配置您的 CCAPI 实例",
     database: {
       title: "数据库配置",
       description: "连接到您的 PostgreSQL 数据库",
@@ -1275,7 +1275,7 @@ export default {
     importHintPersonalAccessToken:
       "粘贴或选择包含 at-* Codex Personal Access Token 的账号导出 JSON。服务端会通过 OpenAI whoami 校验并重建可信凭据。",
     importWarning:
-      "单次最多导入 {max} 个账号。支持 Sub2API OAuth JSON、Codex-Manager ChatGPT Token JSON、OpenAI Refresh Token、Claude Session Key；API Key、URL、Upstream、Cookie 会被拒绝。",
+      "单次最多导入 {max} 个账号。支持 CCAPI OAuth JSON、Codex-Manager ChatGPT Token JSON、OpenAI Refresh Token、Claude Session Key；API Key、URL、Upstream、Cookie 会被拒绝。",
     importWarningChoosePlatform:
       "请先选择导入平台。单次最多导入 {max} 个账号；API Key、URL、Upstream、Cookie 会被拒绝。",
     importWarningOpenAI:
@@ -1285,7 +1285,7 @@ export default {
     importWarningPersonalAccessToken:
       "单次最多导入 {max} 个 Codex PAT 账号。只接受 OpenAI OAuth 账号导出 JSON；导出包中的身份、代理和额外元数据不会被信任。",
     importWarningClaude:
-      "单次最多导入 {max} 个 Claude 账号。支持 Sub2API OAuth JSON 或 Claude Session Key。",
+      "单次最多导入 {max} 个 Claude 账号。支持 CCAPI OAuth JSON 或 Claude Session Key。",
     importWarningGemini:
       "单次最多导入 {max} 个 Gemini 账号。仅支持带 Gemini 平台信息的官方 OAuth JSON。",
     importWarningAntigravity:
@@ -1469,7 +1469,7 @@ export default {
     importResultSummary: "创建 {created}，更新 {updated}，跳过 {skipped}，失败 {failed}",
     importErrors: "导入明细",
     importInvalidFile:
-      "导入文件无效：需要账号数组或包含 accounts 的 Sub2API 导出文件。",
+      "导入文件无效：需要账号数组或包含 accounts 的 CCAPI 导出文件。",
     importInvalidAccount: "账号条目无效",
     importMissingName: "账号名称不能为空",
     importOnlyOAuth: "已跳过：个人导入不接受该账号类型",
@@ -5360,7 +5360,7 @@ export default {
       credentialImportHint:
 		"粘贴账号凭证或导入文件，后台凭证导入会创建平台 OAuth 或 OpenAI Agent Identity 账号。",
       credentialImportWarning:
-		"该入口只接收官方 OAuth 凭证与 OpenAI Agent Identity JSON：Sub2API OAuth JSON、Codex-Manager ChatGPT Token JSON、OpenAI Refresh Token、Claude Session Key；API Key、URL、Upstream、Cookie 会被拒绝。Agent Identity 仅支持管理员私有账号，不支持归属用户或公开共享。",
+		"该入口只接收官方 OAuth 凭证与 OpenAI Agent Identity JSON：CCAPI OAuth JSON、Codex-Manager ChatGPT Token JSON、OpenAI Refresh Token、Claude Session Key；API Key、URL、Upstream、Cookie 会被拒绝。Agent Identity 仅支持管理员私有账号，不支持归属用户或公开共享。",
       dataExportConfirmMessage:
         "导出的数据包含账号与代理的敏感信息，请妥善保存。",
       dataExportConfirm: "确认导出",
@@ -8846,7 +8846,7 @@ export default {
       },
       linuxdo: {
         title: "LinuxDo Connect 登录",
-        description: "配置 LinuxDo Connect OAuth，用于 Sub2API 用户登录",
+        description: "配置 LinuxDo Connect OAuth，用于 CCAPI 用户登录",
         enable: "启用 LinuxDo 登录",
         enableHint: "在登录/注册页面显示 LinuxDo 登录入口",
         clientId: "Client ID",
@@ -9065,7 +9065,7 @@ export default {
           "禁用用户注册、公开页面和自助服务功能。仅管理员可以登录和管理平台。",
         siteName: "站点名称",
         siteNameHint: "显示在邮件和页面标题中",
-        siteNamePlaceholder: "Sub2API",
+        siteNamePlaceholder: "CCAPI",
         siteSubtitle: "站点副标题",
         siteSubtitleHint: "显示在登录和注册页面",
         siteSubtitlePlaceholder: "订阅转 API 转换平台",
@@ -9402,7 +9402,7 @@ export default {
         fromEmail: "发件人邮箱",
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: "发件人名称",
-        fromNamePlaceholder: "Sub2API",
+        fromNamePlaceholder: "CCAPI",
         useTls: "使用 TLS",
         useTlsHint: "为 SMTP 连接启用 TLS 加密",
       },
@@ -9667,7 +9667,7 @@ export default {
         scopeBedrock: "仅 Bedrock 账号",
         userIds: "指定用户",
         userIdsHint:
-          "输入任意邮箱关键词进行模糊搜索。留空表示对全部 Sub2API 用户生效；选中用户的 API Key 请求优先匹配用户规则。",
+          "输入任意邮箱关键词进行模糊搜索。留空表示对全部 CCAPI 用户生效；选中用户的 API Key 请求优先匹配用户规则。",
         userSearchPlaceholder: "输入用户邮箱搜索",
         userSearchEmpty: "未找到匹配用户",
         userSearchFailed: "用户搜索失败，请重试",
@@ -10141,16 +10141,16 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: "👋 欢迎使用 Sub2API",
+        title: "👋 欢迎使用 CCAPI",
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">CCAPI 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
         nextBtn: "开始配置 🚀",
         prevBtn: "跳过",
       },
       groupManage: {
         title: "📦 第一步：分组管理",
         description:
-          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 Sub2API 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>',
+          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 CCAPI 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>',
       },
       createGroup: {
         title: "➕ 创建新分组",
@@ -10262,9 +10262,9 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: "👋 欢迎使用 Sub2API",
+        title: "👋 欢迎使用 CCAPI",
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 Sub2API AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 CCAPI AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
         nextBtn: "开始 🚀",
         prevBtn: "跳过",
       },
