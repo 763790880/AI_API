@@ -2767,11 +2767,11 @@ func (h *AccountHandler) SyncUpstreamModelsPreview(c *gin.Context) {
 	if err != nil {
 		var syncErr *service.UpstreamModelSyncError
 		if errors.As(err, &syncErr) {
+			slog.Warn("sync_upstream_models_preview_failed", "platform", req.Platform, "kind", syncErr.Kind, "message", syncErr.SafeMessage())
 			switch syncErr.Kind {
 			case service.UpstreamModelSyncErrorConfiguration, service.UpstreamModelSyncErrorUnsupported:
 				response.BadRequest(c, syncErr.SafeMessage())
 			default:
-				slog.Warn("sync_upstream_models_preview_failed", "platform", req.Platform, "kind", syncErr.Kind)
 				response.Error(c, http.StatusBadGateway, syncErr.SafeMessage())
 			}
 			return
@@ -2781,6 +2781,7 @@ func (h *AccountHandler) SyncUpstreamModelsPreview(c *gin.Context) {
 		return
 	}
 
+	slog.Info("sync_upstream_models_preview_succeeded", "platform", req.Platform, "model_count", len(models))
 	response.Success(c, gin.H{"models": models})
 }
 

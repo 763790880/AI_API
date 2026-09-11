@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import AdminUpstreamAccountModal from '../AdminUpstreamAccountModal.vue'
-import { normalizeUpstreamBaseURL } from '../upstreamAccount'
+import { normalizeUpstreamBaseURL, upstreamModelErrorMessage } from '../upstreamAccount'
 
 const mocks = vi.hoisted(() => ({ post: vi.fn(), create: vi.fn() }))
 vi.mock('@/api/client', () => ({ apiClient: { post: mocks.post } }))
@@ -20,6 +20,44 @@ function setup() {
 beforeEach(() => { vi.resetAllMocks() })
 
 describe('third-party upstream account', () => {
+  it.each([
+    [{ status: 502, message: 'Upstream model list request failed with HTTP 403' }, '上游拒绝了服务器请求'],
+    [{ status: 502, message: 'Upstream model list request failed with HTTP 401' }, '上游 API Key'],
+    [{ status: 502, message: 'Upstream model list request failed with HTTP 404' }, '模型列表接口'],
+    [{ status: 401 }, '重新登录管理员'],
+    [{ status: 403 }, '没有管理员权限'],
+    [{ status: 0, code: 'ECONNABORTED' }, '读取模型超时'],
+    [{ status: 0 }, '无法连接 CCAPI'],
+    [{ status: 400, message: 'Invalid OpenAI base URL' }, '上游域名白名单'],
+    [{ status: 502, message: 'Upstream returned no supported models' }, 'Key 的模型权限'],
+    [{ status: 502, message: 'Upstream model list response was not valid JSON' }, '格式无法识别']
+  ])('explains a known failure without exposing the response: %j', (error, expected) => {
+    expect(upstreamModelErrorMessage(error)).toContain(expected)
+  })
+  it('does not display unexpected response text appended to a known error', () => {
+    const message = upstreamModelErrorMessage({ status: 502, message: 'Upstream model list request failed with HTTP 403 secret-placeholder' })
+    expect(message).not.toContain('secret-placeholder')
+  })
+  it('shows actionable URL validation before requesting models', async () => {
+    const wrapper = setup()
+    await wrapper.get('[name="upstream-url"]').setValue('https://relay.example.com/v1/chat/completions')
+    await wrapper.get('[name="upstream-key"]').setValue('test-placeholder')
+    await flushPromises()
+    expect(wrapper.get('[role="alert"]').text()).toContain('不要填写具体请求接口')
+    expect(mocks.post).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+  it('shows the upstream HTTP status from the API client error', async () => {
+    mocks.post.mockRejectedValue({ status: 502, message: 'Upstream model list request failed with HTTP 403' })
+    const wrapper = setup()
+    await wrapper.get('[name="upstream-url"]').setValue('relay.example.com')
+    await wrapper.get('[name="upstream-key"]').setValue('test-placeholder')
+    await flushPromises()
+    expect(wrapper.get('[role="alert"]').text()).toContain('上游 /v1/models 返回 HTTP 403')
+    await wrapper.get('form').trigger('submit')
+    expect(mocks.create).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
   it.each(['relay.example.com', 'https://relay.example.com/v1/', 'https://relay.example.com/'])(
     'normalizes domain and v1 suffix: %s', value => {
       expect(normalizeUpstreamBaseURL(value)).toBe('https://relay.example.com')

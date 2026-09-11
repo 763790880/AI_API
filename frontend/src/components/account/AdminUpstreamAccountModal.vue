@@ -11,6 +11,7 @@
             <option value="openai">OpenAI 兼容（Chat Completions / Responses）</option>
             <option value="anthropic">Anthropic 兼容（Messages）</option>
           </select>
+          <span class="input-hint">按请求接口选择协议：/chat/completions 选择 OpenAI 兼容，即使调用的是 Claude 模型。</span>
         </label>
         <label class="block"><span class="input-label">中转站域名 / Base URL</span>
           <input v-model="baseURL" name="upstream-url" required class="input" placeholder="https://relay.example.com 或 https://relay.example.com/v1" @change="readModels" />
@@ -52,7 +53,7 @@ import BaseDialog from '@/components/common/BaseDialog.vue'
 import GroupSelector from '@/components/common/GroupSelector.vue'
 import { apiClient } from '@/api/client'
 import { create } from '@/api/admin/accounts'
-import { normalizeUpstreamBaseURL } from './upstreamAccount'
+import { normalizeUpstreamBaseURL, upstreamModelErrorMessage } from './upstreamAccount'
 import type { AdminGroup } from '@/types'
 
 const props = defineProps<{ show: boolean; groups: AdminGroup[] }>()
@@ -97,8 +98,15 @@ async function readModels() {
   models.value = []
   selectedModels.value = []
   error.value = ''
+  let normalized: string
   try {
-    const normalized = normalizeUpstreamBaseURL(baseURL.value)
+    normalized = normalizeUpstreamBaseURL(baseURL.value)
+  } catch (err) {
+    // These errors originate in our URL validator, never in the upstream response.
+    error.value = (err as Error).message
+    return
+  }
+  try {
     loading.value = true
     const { data } = await apiClient.post<{ models: string[] }>('/admin/accounts/models/sync-upstream-preview', {
       platform: platform.value, type: 'apikey', base_url: normalized, api_key: apiKey.value.trim()
@@ -107,8 +115,8 @@ async function readModels() {
     models.value = [...new Set(data.models.map(model => model.trim()).filter(Boolean))].sort()
     selectedModels.value = [...models.value]
     if (!models.value.length) error.value = '中转站没有返回可用模型，请检查 Key 的模型权限。'
-  } catch {
-    if (current === generation) error.value = '读取模型失败，请检查域名、Key 和中转站的 /v1/models 接口，然后重试。'
+  } catch (err) {
+    if (current === generation) error.value = upstreamModelErrorMessage(err)
   } finally {
     if (current === generation) loading.value = false
   }
