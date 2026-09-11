@@ -208,6 +208,7 @@
                 </template>
               </HelpTooltip>
               <span v-else class="font-medium text-gray-900 dark:text-white">{{ value }}</span>
+              <span v-if="row.extra?.account_source === 'third_party'" class="text-xs text-primary-600 dark:text-primary-400">第三方中转站</span>
               <span
                 v-if="accountDisplayEmail(row)"
                 class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]"
@@ -389,7 +390,8 @@
       </template>
       <template #pagination><Pagination v-if="pagination.total > 0" :page="pagination.page" :total="pagination.total" :page-size="pagination.page_size" @update:page="handlePageChange" @update:pageSize="handlePageSizeChange" /></template>
     </TablePageLayout>
-    <CreateAccountModal :show="showCreate" :proxies="proxies" :groups="groups" @close="showCreate = false" @created="reload" />
+    <CreateAccountModal :show="showCreate" :proxies="proxies" :groups="groups" @close="showCreate = false" @created="reload" @upstream="showCreate = false; showUpstreamCreate = true" />
+    <AdminUpstreamAccountModal :show="showUpstreamCreate" :groups="groups" @close="showUpstreamCreate = false" @created="reload" />
     <EditAccountModal :show="showEdit" :account="edAcc" :proxies="proxies" :groups="groups" @close="showEdit = false" @updated="handleAccountUpdated" />
     <ReAuthAccountModal :show="showReAuth" :account="reAuthAcc" @close="closeReAuthModal" @reauthorized="handleAccountUpdated" />
     <AccountTestModal :show="showTest" :account="testingAcc" @close="closeTestModal" @test-success="handleTestSuccess" />
@@ -473,6 +475,7 @@ import HelpTooltip from '@/components/common/HelpTooltip.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { CreateAccountModal, EditAccountModal, BulkEditAccountModal, SyncFromCrsModal, TempUnschedStatusModal } from '@/components/account'
+import AdminUpstreamAccountModal from '@/components/account/AdminUpstreamAccountModal.vue'
 import AccountTableActions from '@/components/admin/account/AccountTableActions.vue'
 import AccountTableFilters from '@/components/admin/account/AccountTableFilters.vue'
 import AccountBulkActionsBar from '@/components/admin/account/AccountBulkActionsBar.vue'
@@ -579,6 +582,7 @@ const selTypes = computed<AccountType[]>(() => {
   return [...types]
 })
 const showCreate = ref(false)
+const showUpstreamCreate = ref(false)
 const showEdit = ref(false)
 const showSync = ref(false)
 const showCredentialImport = ref(false)
@@ -998,7 +1002,7 @@ watch(loading, (isLoading, wasLoading) => {
 
 const isAnyModalOpen = computed(() => {
   return (
-    showCreate.value ||
+    showCreate.value || showUpstreamCreate.value ||
     showEdit.value ||
     showSync.value ||
     showCredentialImport.value ||

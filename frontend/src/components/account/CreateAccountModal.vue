@@ -104,6 +104,9 @@
       <div v-if="!lockPlatform">
         <label class="input-label">{{ t('admin.accounts.platform') }}</label>
         <div class="mt-2 flex flex-wrap rounded-lg bg-gray-100 p-1 dark:bg-dark-700" data-tour="account-form-platform">
+          <button v-if="!isUserScope" type="button" class="flex flex-1 items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium text-primary-600 hover:bg-white dark:text-primary-400 dark:hover:bg-dark-600" @click="emit('upstream')">
+            <Icon name="cloud" size="sm" />第三方中转站
+          </button>
           <button
             type="button"
             @click="form.platform = 'anthropic'"
@@ -3698,6 +3701,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const emit = defineEmits<{
   close: []
+  upstream: []
   created: [accounts?: Account[]]
   // 通知父组件当前选中的平台/等级，父组件据此拉取「该范围内可用」的平台代理。
   // 不发这个事件的话，父组件只能按空范围取到通用代理，平台/等级专属代理永远选不到。

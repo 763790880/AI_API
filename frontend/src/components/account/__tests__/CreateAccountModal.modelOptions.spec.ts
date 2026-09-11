@@ -173,6 +173,18 @@ function mountModal(accountScope: 'admin' | 'user' = 'admin') {
 }
 
 describe('CreateAccountModal priced model options', () => {
+  it.each(['admin', 'user'] as const)('第三方中转站入口的 %s 权限', async scope => {
+    const wrapper = mountModal(scope)
+    await wrapper.setProps({ show: true, lockPlatform: false })
+    await flushPromises()
+    const entry = wrapper.findAll('button').find(button => button.text().includes('第三方中转站'))
+    expect(!!entry).toBe(scope === 'admin')
+    if (entry) {
+      await entry.trigger('click')
+      expect(wrapper.emitted('upstream')).toHaveLength(1)
+    }
+    wrapper.unmount()
+  })
   beforeEach(() => {
     createAdminAccountMock.mockReset()
     createAdminAccountMock.mockResolvedValue({ id: 1 })
