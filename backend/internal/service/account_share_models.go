@@ -49,7 +49,7 @@ func (s *AccountShareModeService) modelsForRequest(ctx context.Context, apiKey *
 		return nil, fmt.Errorf("read account share model binding: %w", err)
 	}
 	if membership == nil || listing == nil || membership.AccountID <= 0 {
-		return nil, nil
+		return nil, ErrAccountShareModeGroupUnbound
 	}
 	if s.accountRepo == nil {
 		return nil, ErrServiceUnavailable
