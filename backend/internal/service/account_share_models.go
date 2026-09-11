@@ -37,19 +37,19 @@ func (s *AccountShareModeService) modelsForRequest(ctx context.Context, apiKey *
 		return nil, nil
 	}
 	if apiKey.UserID <= 0 || apiKey.ID <= 0 {
-		return nil, ErrAccountShareModeGroupUnbound
+		return nil, nil
 	}
 	// This read applies the member's effective terms without activating queued
 	// rooms, renewing paid seats, touching idle time, or rebinding accounts.
 	membership, listing, err := s.repo.GetActiveMembershipForRequest(ctx, apiKey.UserID, apiKey.ID, *apiKey.GroupID)
 	if errors.Is(err, ErrAccountShareListingNotFound) {
-		return nil, ErrAccountShareModeGroupUnbound
+		return nil, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("read account share model binding: %w", err)
 	}
 	if membership == nil || listing == nil || membership.AccountID <= 0 {
-		return nil, ErrAccountShareModeGroupUnbound
+		return nil, nil
 	}
 	if s.accountRepo == nil {
 		return nil, ErrServiceUnavailable
