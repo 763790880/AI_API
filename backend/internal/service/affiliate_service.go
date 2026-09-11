@@ -296,7 +296,7 @@ func (s *AffiliateService) GetAffiliateShareSummary(ctx context.Context, userID 
 		return &AffiliateShareSummary{Enabled: false}, nil
 	}
 
-	summary, err := s.repo.GetAffiliateByUserID(ctx, userID)
+	summary, err := s.EnsureUserAffiliate(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
