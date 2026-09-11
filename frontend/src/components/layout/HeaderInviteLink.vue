@@ -44,10 +44,11 @@ const { copied, copyToClipboard } = useClipboard()
 
 const inviteCode = ref('')
 const rebateRate = ref(0)
+const affiliateEnabled = ref(false)
 let isUnmounted = false
 
 const inviteLink = computed(() => buildAffiliateInviteLink(inviteCode.value))
-const showInviteAction = computed(() => Boolean(inviteLink.value) && rebateRate.value > 0)
+const showInviteAction = computed(() => affiliateEnabled.value && Boolean(inviteLink.value))
 const formattedRebateRate = computed(() => {
   return new Intl.NumberFormat(locale.value, {
     maximumFractionDigits: 2,
@@ -73,8 +74,10 @@ async function loadInviteLink(): Promise<void> {
       return
     }
     if (!summary.enabled) {
+      affiliateEnabled.value = false
       return
     }
+    affiliateEnabled.value = true
     inviteCode.value = summary.aff_code ?? ''
     rebateRate.value = summary.effective_rebate_rate_percent
   } catch (error) {
