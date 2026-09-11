@@ -127,6 +127,35 @@ type stubUserRepo struct {
 	getByID func(ctx context.Context, id int64) (*service.User, error)
 }
 
+func TestAdminUpstreamRoutesRejectOrdinaryUser(t *testing.T) {
+	cfg := &config.Config{JWT: config.JWTConfig{Secret: "test-only-secret", ExpireHour: 1}}
+	auth := service.NewAuthService(nil, nil, nil, nil, cfg, nil, nil, nil, nil, nil, nil, nil)
+	user := &service.User{ID: 8, Email: "member@example.com", Role: service.RoleUser, Status: service.StatusActive}
+	users := service.NewUserService(&stubUserRepo{getByID: func(context.Context, int64) (*service.User, error) { return user, nil }}, nil, nil, nil)
+	token, err := auth.GenerateToken(user)
+	require.NoError(t, err)
+	router := gin.New()
+	admin := router.Group("/api/v1/admin", gin.HandlerFunc(NewAdminAuthMiddleware(auth, users, nil)))
+	reached := false
+	handler := func(c *gin.Context) { reached = true; c.Status(http.StatusOK) }
+	admin.POST("/accounts", handler)
+	admin.POST("/accounts/models/sync-upstream-preview", handler)
+	for _, path := range []string{"/api/v1/admin/accounts", "/api/v1/admin/accounts/models/sync-upstream-preview"} {
+		for _, authorization := range []string{"", "Bearer " + token} {
+			req := httptest.NewRequest(http.MethodPost, path, nil)
+			req.Header.Set("Authorization", authorization)
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+			if authorization == "" {
+				require.Equal(t, http.StatusUnauthorized, rec.Code)
+			} else {
+				require.Equal(t, http.StatusForbidden, rec.Code)
+			}
+			require.False(t, reached)
+		}
+	}
+}
+
 func (s *stubUserRepo) Create(ctx context.Context, user *service.User) error {
 	panic("unexpected Create call")
 }
