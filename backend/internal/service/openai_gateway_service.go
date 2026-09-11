@@ -2859,7 +2859,12 @@ func (s *OpenAIGatewayService) resolveAccountShareModeBoundAccount(ctx context.C
 		return nil, true, ErrAccountShareModeGroupUnbound
 	}
 	membership, listing, err := s.accountShareModeService.ResolveActiveBindingForRequest(ctx, requestCtx.UserID, requestCtx.APIKeyID, *groupID)
-	if err != nil {`r`n`t`tif errors.Is(err, ErrAccountShareListingNotFound) || errors.Is(err, ErrAccountShareModeGroupUnbound) {`r`n`t`t`treturn nil, false, nil`r`n`t`t}`r`n`t`treturn nil, true, err`r`n`t}
+	if err != nil {
+		if errors.Is(err, ErrAccountShareListingNotFound) || errors.Is(err, ErrAccountShareModeGroupUnbound) {
+			return nil, false, nil
+		}
+		return nil, true, err
+	}
 	if membership == nil || listing == nil {
 		return nil, false, nil
 	}
@@ -10426,4 +10431,3 @@ func normalizeOpenAIReasoningEffortForModel(raw, model string) string {
 	}
 	return normalizeOpenAIReasoningEffort(raw)
 }
-
