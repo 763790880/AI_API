@@ -6134,6 +6134,7 @@
               </div>
 
               <div v-if="form.affiliate_enabled" class="space-y-6">
+                <SharePolicyPanel />
                 <div>
                   <label class="input-label">
                     {{ t("admin.settings.features.affiliate.durationDays") }}
@@ -7872,6 +7873,7 @@ import ProxySelector from "@/components/common/ProxySelector.vue";
 import ImageUpload from "@/components/common/ImageUpload.vue";
 import BackupSettings from "@/views/admin/BackupView.vue";
 import OpenAIFastPolicyUserSelector from "@/views/admin/settings/OpenAIFastPolicyUserSelector.vue";
+import SharePolicyPanel from "@/components/admin/revenue/SharePolicyPanel.vue";
 import { useClipboard } from "@/composables/useClipboard";
 import {
   affiliatesAPI,
