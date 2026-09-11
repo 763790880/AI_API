@@ -2860,10 +2860,13 @@ func (s *OpenAIGatewayService) resolveAccountShareModeBoundAccount(ctx context.C
 	}
 	membership, listing, err := s.accountShareModeService.ResolveActiveBindingForRequest(ctx, requestCtx.UserID, requestCtx.APIKeyID, *groupID)
 	if err != nil {
+		if errors.Is(err, ErrAccountShareListingNotFound) || errors.Is(err, ErrAccountShareModeGroupUnbound) {
+			return nil, false, nil
+		}
 		return nil, true, err
 	}
 	if membership == nil || listing == nil {
-		return nil, true, ErrAccountShareModeGroupUnbound
+		return nil, false, nil
 	}
 	accountID := membership.AccountID
 	if accountID <= 0 {
