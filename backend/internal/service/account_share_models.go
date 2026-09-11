@@ -37,7 +37,7 @@ func (s *AccountShareModeService) modelsForRequest(ctx context.Context, apiKey *
 		return nil, nil
 	}
 	if apiKey.UserID <= 0 || apiKey.ID <= 0 {
-		return nil, nil
+		return nil, ErrAccountShareModeGroupUnbound
 	}
 	// This read applies the member's effective terms without activating queued
 	// rooms, renewing paid seats, touching idle time, or rebinding accounts.
