@@ -130,7 +130,7 @@ func TestForwardGrokMediaContentFetchesSignedURLWithoutCredentials(t *testing.T)
 	require.True(t, IsResponseCommitted(c))
 }
 
-func TestForwardGrokMediaContentFollowsAuthenticatedSub2APIChain(t *testing.T) {
+func TestForwardGrokMediaContentFollowsAuthenticatedCCAPIChain(t *testing.T) {
 	for _, statusURL := range []string{
 		`/v1/videos/task-1/content`,
 		`https://different-relay.example/v1/videos/task-1/content`,

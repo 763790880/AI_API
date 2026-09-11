@@ -190,8 +190,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: "Sub2API Setup",
-    description: "Configure your Sub2API instance",
+    title: "CCAPI Setup",
+    description: "Configure your CCAPI instance",
     database: {
       title: "Database Configuration",
       description: "Connect to your PostgreSQL database",
@@ -1319,7 +1319,7 @@ export default {
     importHintPersonalAccessToken:
       "Paste or select an account export JSON containing an at-* Codex personal access token. The server validates it with OpenAI whoami and rebuilds trusted credentials.",
     importWarning:
-      "You can import up to {max} accounts at a time. Supported: Sub2API OAuth JSON, Codex-Manager ChatGPT token JSON, OpenAI Refresh Token, and Claude Session Key. API keys, URLs, upstream endpoints and cookies are rejected.",
+      "You can import up to {max} accounts at a time. Supported: CCAPI OAuth JSON, Codex-Manager ChatGPT token JSON, OpenAI Refresh Token, and Claude Session Key. API keys, URLs, upstream endpoints and cookies are rejected.",
     importWarningChoosePlatform:
       "Select the import platform first. You can import up to {max} accounts at a time. API keys, URLs, upstream endpoints and cookies are rejected.",
     importWarningOpenAI:
@@ -1329,7 +1329,7 @@ export default {
     importWarningPersonalAccessToken:
       "You can import up to {max} Codex PAT accounts. Only OpenAI OAuth account export JSON is accepted; exported identity, proxy, and extra metadata are not trusted.",
     importWarningClaude:
-      "You can import up to {max} Claude accounts. Supports Sub2API OAuth JSON or Claude Session Key.",
+      "You can import up to {max} Claude accounts. Supports CCAPI OAuth JSON or Claude Session Key.",
     importWarningGemini:
       "You can import up to {max} Gemini accounts. Only official OAuth JSON with Gemini platform metadata is accepted.",
     importWarningAntigravity:
@@ -1521,7 +1521,7 @@ export default {
       "Created {created}, updated {updated}, skipped {skipped}, failed {failed}",
     importErrors: "Import Details",
     importInvalidFile:
-      "Invalid import file: expected an account array or a Sub2API export with accounts.",
+      "Invalid import file: expected an account array or a CCAPI export with accounts.",
     importInvalidAccount: "Invalid account item",
     importMissingName: "Account name is required",
     importOnlyOAuth:
@@ -5481,7 +5481,7 @@ export default {
       credentialImportHint:
 		"Paste account credentials or import files. Admin credential import creates platform OAuth or OpenAI Agent Identity accounts.",
       credentialImportWarning:
-		"This entry only accepts official OAuth credentials and OpenAI Agent Identity JSON: Sub2API OAuth JSON, Codex-Manager ChatGPT token JSON, OpenAI Refresh Token, and Claude Session Key. API keys, URLs, upstream endpoints and cookies are rejected. Agent Identity is admin-private only and cannot be user-owned or publicly shared.",
+		"This entry only accepts official OAuth credentials and OpenAI Agent Identity JSON: CCAPI OAuth JSON, Codex-Manager ChatGPT token JSON, OpenAI Refresh Token, and Claude Session Key. API keys, URLs, upstream endpoints and cookies are rejected. Agent Identity is admin-private only and cannot be user-owned or publicly shared.",
       dataExportConfirmMessage:
         "The exported data contains sensitive account and proxy information. Store it securely.",
       dataExportConfirm: "Confirm Export",
@@ -9058,7 +9058,7 @@ export default {
       linuxdo: {
         title: "LinuxDo Connect Login",
         description:
-          "Configure LinuxDo Connect OAuth for Sub2API end-user login",
+          "Configure LinuxDo Connect OAuth for CCAPI end-user login",
         enable: "Enable LinuxDo Login",
         enableHint: "Show LinuxDo login on the login/register pages",
         clientId: "Client ID",
@@ -9290,7 +9290,7 @@ export default {
         backendModeDescription:
           "Disables user registration, public site, and self-service features. Only admin can log in and manage the platform.",
         siteName: "Site Name",
-        siteNamePlaceholder: "Sub2API",
+        siteNamePlaceholder: "CCAPI",
         siteNameHint: "Displayed in emails and page titles",
         siteSubtitle: "Site Subtitle",
         siteSubtitlePlaceholder: "Subscription to API Conversion Platform",
@@ -9649,7 +9649,7 @@ export default {
         fromEmail: "From Email",
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: "From Name",
-        fromNamePlaceholder: "Sub2API",
+        fromNamePlaceholder: "CCAPI",
         useTls: "Use TLS",
         useTlsHint: "Enable TLS encryption for SMTP connection",
       },
@@ -9938,7 +9938,7 @@ export default {
         scopeBedrock: "Bedrock only",
         userIds: "Specific users",
         userIdsHint:
-          "Type any part of a user email to search. Leave empty to apply to all Sub2API users. Selected users match requests from their API keys and take precedence over global rules.",
+          "Type any part of a user email to search. Leave empty to apply to all CCAPI users. Selected users match requests from their API keys and take precedence over global rules.",
         userSearchPlaceholder: "Search by user email",
         userSearchEmpty: "No matching users found",
         userSearchFailed: "User search failed. Please try again.",
@@ -10441,16 +10441,16 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: "👋 Welcome to Sub2API",
+        title: "👋 Welcome to CCAPI",
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">CCAPI is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
         nextBtn: "Start Setup 🚀",
         prevBtn: "Skip",
       },
       groupManage: {
         title: "📦 Step 1: Group Management",
         description:
-          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of Sub2API, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>',
+          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of CCAPI, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>',
       },
       createGroup: {
         title: "➕ Create New Group",
@@ -10562,9 +10562,9 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: "👋 Welcome to Sub2API",
+        title: "👋 Welcome to CCAPI",
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the Sub2API AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the CCAPI AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
         nextBtn: "Start 🚀",
         prevBtn: "Skip",
       },

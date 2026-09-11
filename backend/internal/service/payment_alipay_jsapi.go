@@ -279,14 +279,14 @@ func exchangeAlipayJSAPIAuthCode(ctx context.Context, provider *provider.Alipay,
 
 func alipayJSAPIOrderSubject(order *dbent.PaymentOrder) string {
 	if order == nil {
-		return "Sub2API Payment"
+		return "CCAPI Payment"
 	}
 	switch order.OrderType {
 	case payment.OrderTypeSubscription:
-		return "Sub2API Subscription"
+		return "CCAPI Subscription"
 	case payment.OrderTypeShop:
-		return "Sub2API Store Order"
+		return "CCAPI Store Order"
 	default:
-		return "Sub2API " + payment.FormatAmountForCurrency(order.Amount, PaymentOrderCurrency(order)) + " " + PaymentOrderCurrency(order)
+		return "CCAPI " + payment.FormatAmountForCurrency(order.Amount, PaymentOrderCurrency(order)) + " " + PaymentOrderCurrency(order)
 	}
 }
