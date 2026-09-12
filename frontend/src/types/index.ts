@@ -800,7 +800,7 @@ export interface PaginationConfig {
 
 // ==================== API Key & Group Types ====================
 
-export type GroupPlatform = "anthropic" | "openai" | "gemini" | "antigravity" | "grok" | "opencode";
+export type GroupPlatform = "anthropic" | "openai" | "gemini" | "antigravity" | "grok" | "opencode" | "domestic";
 export type GrokVideoModelFamily =
   | "grok-imagine-video"
   | "grok-imagine-video-1.5";

@@ -8,10 +8,10 @@ import (
 func TestAccountSchedulableInQuotaGroup_ThirdPartyUsesBoundGroupPlatform(t *testing.T) {
 	now := time.Now()
 	account := Account{
-		Platform:   PlatformOpenAI,
-		Status:     StatusActive,
+		Platform:    PlatformOpenAI,
+		Status:      StatusActive,
 		Schedulable: true,
-		Extra:      map[string]any{"account_source": "third_party"},
+		Extra:       map[string]any{"account_source": "third_party"},
 	}
 	if !accountSchedulableInQuotaGroup(account, now, StatusActive, "kiro", "", false, false) {
 		t.Fatal("third-party account should be schedulable in its bound group platform")

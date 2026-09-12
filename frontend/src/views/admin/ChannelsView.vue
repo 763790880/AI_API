@@ -400,6 +400,7 @@
 
             <!-- Model Pricing -->
             <div>
+              <DomesticPricingReference v-if="section.platform === 'domestic'" @append="(rate, mode) => appendDomesticPricing(sIdx, rate, mode)" />
               <div class="mb-1 flex items-center justify-between">
                 <label class="input-label text-xs mb-0">{{ t('admin.channels.form.modelPricing', 'Model Pricing') }}</label>
                 <button type="button" @click="addPricingEntry(sIdx)" class="text-xs text-primary-600 hover:text-primary-700">
@@ -635,6 +636,8 @@ import Icon from '@/components/icons/Icon.vue'
 import PlatformIcon from '@/components/common/PlatformIcon.vue'
 import Toggle from '@/components/common/Toggle.vue'
 import PricingEntryCard from '@/components/admin/channel/PricingEntryCard.vue'
+import DomesticPricingReference from '@/components/admin/channel/DomesticPricingReference.vue'
+import { appendMissingDomesticPricing, DOMESTIC_FX } from '@/components/admin/channel/domesticPricing'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 import { useKeyedDebouncedSearch } from '@/composables/useKeyedDebouncedSearch'
 
@@ -741,7 +744,7 @@ const form = reactive({
 let abortController: AbortController | null = null
 
 // ── Platform config ──
-const platformOrder: GroupPlatform[] = ['anthropic', 'openai', 'gemini', 'antigravity', 'grok', 'opencode']
+const platformOrder: GroupPlatform[] = ['anthropic', 'openai', 'gemini', 'antigravity', 'grok', 'opencode', 'domestic']
 
 // ── Helpers ──
 function formatDate(value: string): string {
@@ -769,6 +772,10 @@ function addPlatformSection(platform: GroupPlatform) {
 async function loadPlatformCatalog(sectionIdx: number) {
   const section = form.platforms[sectionIdx]
   if (!section || editingChannel.value || section.model_pricing.length > 0) return
+  if (section.platform === 'domestic') {
+    appendDomesticPricing(sectionIdx, DOMESTIC_FX.cnyPerUSD, 'peak')
+    return
+  }
   try {
     const { models } = await adminAPI.channels.getModelCatalog(section.platform)
     if (form.platforms[sectionIdx] !== section || section.model_pricing.length > 0) return
@@ -787,6 +794,12 @@ async function loadPlatformCatalog(sectionIdx: number) {
   } catch (error) {
     console.warn('加载平台模型目录失败', error)
   }
+}
+
+function appendDomesticPricing(sectionIdx: number, rate: number, mode: 'peak' | 'offPeak') {
+  const section = form.platforms[sectionIdx]
+  if (!section || section.platform !== 'domestic' || !Number.isFinite(rate) || rate <= 0) return
+  appendMissingDomesticPricing(section.model_pricing, rate, mode)
 }
 
 function togglePlatform(platform: GroupPlatform) {

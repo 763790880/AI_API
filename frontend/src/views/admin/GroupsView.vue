@@ -3701,6 +3701,7 @@ const platformOptions = computed(() => [
   { value: "antigravity", label: "Antigravity" },
   { value: "grok", label: "Grok" },
   { value: "opencode", label: "OpenCode" },
+  { value: "domestic", label: "国产模型" },
 ]);
 
 const platformFilterOptions = computed(() => [
@@ -3711,6 +3712,7 @@ const platformFilterOptions = computed(() => [
   { value: "antigravity", label: "Antigravity" },
   { value: "grok", label: "Grok" },
   { value: "opencode", label: "OpenCode" },
+  { value: "domestic", label: "国产模型" },
 ]);
 
 const editStatusOptions = computed(() => [
@@ -5192,8 +5194,8 @@ watch(
     if (newVal !== "openai") {
       resetMessagesDispatchFormState(createForm);
     }
-    // opencode 同时支持 /messages（MiniMax/Qwen），默认开启调度。
-    if (newVal === "opencode") {
+    // OpenCode 和国产模型支持 OpenAI 兼容的 /messages 转换。
+    if (newVal === "opencode" || newVal === "domestic") {
       createForm.allow_messages_dispatch = true;
     }
     if (!["openai", "antigravity", "anthropic", "gemini", "grok"].includes(newVal)) {
@@ -5219,8 +5221,8 @@ watch(
       resetMessagesDispatchFormState(editForm);
       editForm.default_mapped_model = "";
     }
-    // opencode 同时支持 /messages（MiniMax/Qwen），默认开启调度。
-    if (newVal === "opencode") {
+    // OpenCode 和国产模型支持 OpenAI 兼容的 /messages 转换。
+    if (newVal === "opencode" || newVal === "domestic") {
       editForm.allow_messages_dispatch = true;
     }
     if (!["openai", "antigravity", "anthropic", "gemini", "grok"].includes(newVal)) {

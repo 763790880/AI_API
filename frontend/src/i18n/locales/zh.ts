@@ -103,6 +103,7 @@ export default {
       antigravity: "Antigravity",
       grok: "Grok",
       opencode: "OpenCode",
+      domestic: "国产模型",
       more: "更多",
     },
     // CTA 区块
@@ -1641,6 +1642,7 @@ export default {
         codexCliWs: "Codex CLI (WebSocket)",
         grokCli: "Grok CLI",
         opencode: "OpenCode",
+        domestic: "国产模型",
       },
       antigravity: {
         description:
@@ -1953,6 +1955,7 @@ export default {
       antigravity: "Antigravity",
       grok: "Grok",
       opencode: "OpenCode",
+      domestic: "国产模型",
     },
     extraModelsHeader: "附加模型",
     extraModelsEmpty: "无附加模型",
@@ -4058,6 +4061,7 @@ export default {
         antigravity: "Antigravity",
         grok: "Grok",
         opencode: "OpenCode",
+        domestic: "国产模型",
       },
       saving: "保存中...",
       noGroups: "暂无分组",
@@ -5574,6 +5578,7 @@ export default {
         antigravity: "Antigravity",
         grok: "Grok",
         opencode: "OpenCode",
+        domestic: "国产模型",
       },
       types: {
         oauth: "OAuth",

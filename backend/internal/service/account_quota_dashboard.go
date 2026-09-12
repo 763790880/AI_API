@@ -697,6 +697,9 @@ func isAccountTemporarilyUnschedulable(account Account, now time.Time) bool {
 }
 
 func accountSchedulableInQuotaGroup(account Account, now time.Time, groupStatus, groupPlatform, requiredAccountLevel string, requireOAuthOnly, requirePrivacySet bool) bool {
+	if groupPlatform == PlatformDomestic && !isDomesticUpstreamAccount(&account) {
+		return false
+	}
 	if !account.IsSchedulableAt(now) {
 		return false
 	}

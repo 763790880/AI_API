@@ -24,6 +24,8 @@ const (
 	PlatformAntigravity = "antigravity"
 	PlatformGrok        = "grok"
 	PlatformOpencode    = "opencode"
+	// PlatformDomestic is a group/pricing platform using OpenAI-compatible upstream accounts.
+	PlatformDomestic = "domestic"
 )
 
 // Account type constants

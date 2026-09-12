@@ -1406,7 +1406,7 @@ func (h *GatewayHandler) Models(c *gin.Context) {
 		availableModels = h.gatewayService.GetAvailableModels(c.Request.Context(), groupID, platform)
 	}
 
-	if roomModels != nil || len(availableModels) > 0 {
+	if roomModels != nil || len(availableModels) > 0 || platform == service.PlatformDomestic {
 		if platform == service.PlatformGrok {
 			writeGrokModelsList(c, availableModels)
 			return

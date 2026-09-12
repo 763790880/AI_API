@@ -44,6 +44,7 @@ const (
 	PlatformAntigravity = domain.PlatformAntigravity
 	PlatformGrok        = domain.PlatformGrok
 	PlatformOpencode    = domain.PlatformOpencode
+	PlatformDomestic    = domain.PlatformDomestic
 )
 
 // supportedAccountPlatforms is the single service-level source for account platform validation.

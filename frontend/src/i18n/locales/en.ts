@@ -103,6 +103,7 @@ export default {
       antigravity: "Antigravity",
       grok: "Grok",
       opencode: "OpenCode",
+      domestic: "Domestic Models",
       more: "More",
     },
     // CTA section
@@ -1701,6 +1702,7 @@ export default {
         codexCliWs: "Codex CLI (WebSocket)",
         grokCli: "Grok CLI",
         opencode: "OpenCode",
+        domestic: "Domestic Models",
       },
       antigravity: {
         description:
@@ -2021,6 +2023,7 @@ export default {
       antigravity: "Antigravity",
       grok: "Grok",
       opencode: "OpenCode",
+      domestic: "Domestic Models",
     },
     extraModelsHeader: "Extra Models",
     extraModelsEmpty: "No extra models",
@@ -4228,6 +4231,7 @@ export default {
         antigravity: "Antigravity",
         grok: "Grok",
         opencode: "OpenCode",
+        domestic: "Domestic Models",
       },
       deleteConfirm:
         "Are you sure you want to delete '{name}'? All associated API keys will no longer belong to any group.",
@@ -5574,6 +5578,7 @@ export default {
         antigravity: "Antigravity",
         grok: "Grok",
         opencode: "OpenCode",
+        domestic: "Domestic Models",
       },
       types: {
         oauth: "OAuth",

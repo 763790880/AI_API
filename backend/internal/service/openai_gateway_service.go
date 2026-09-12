@@ -2811,7 +2811,7 @@ func (s *OpenAIGatewayService) listSchedulableAccounts(ctx context.Context, grou
 		if err != nil {
 			return nil, err
 		}
-		accounts = FilterAccountsVisibleToRequestUser(ctx, accounts)
+		accounts = filterDomesticAccounts(ctx, FilterAccountsVisibleToRequestUser(ctx, accounts))
 		if platform == PlatformGrok {
 			accounts = s.filterGrokFreeQuotaAccountsForOpenAI(ctx, accounts)
 		}
@@ -2829,7 +2829,7 @@ func (s *OpenAIGatewayService) listSchedulableAccounts(ctx context.Context, grou
 	if err != nil {
 		return nil, fmt.Errorf("query accounts failed: %w", err)
 	}
-	accounts = FilterAccountsVisibleToRequestUser(ctx, accounts)
+	accounts = filterDomesticAccounts(ctx, FilterAccountsVisibleToRequestUser(ctx, accounts))
 	if platform == PlatformGrok {
 		accounts = s.filterGrokFreeQuotaAccountsForOpenAI(ctx, accounts)
 	}
@@ -2930,7 +2930,7 @@ func (s *OpenAIGatewayService) resolveFreshSchedulableOpenAIAccountWithError(ctx
 		fresh = current
 	}
 
-	if !isOpenAIAccountEligibleForRequest(fresh, requestedModel, requireCompact) || s.isOpenAIAccountRequestRuntimeBlocked(fresh, requestedModel) {
+	if !domesticAccountAllowed(ctx, fresh) || !isOpenAIAccountEligibleForRequest(fresh, requestedModel, requireCompact) || s.isOpenAIAccountRequestRuntimeBlocked(fresh, requestedModel) {
 		return nil, nil
 	}
 	if !IsAccountVisibleToRequestUser(ctx, fresh) {
@@ -3181,7 +3181,7 @@ func (s *OpenAIGatewayService) RevalidateSelectedOpenAIAccountForDispatch(
 		)
 	}
 
-	if !isModeGroup && (!IsAccountVisibleToRequestUser(ctx, latest) || !s.isOpenAIAccountInRequestGroup(latest, groupID)) {
+	if !domesticAccountAllowed(ctx, latest) || (!isModeGroup && (!IsAccountVisibleToRequestUser(ctx, latest) || !s.isOpenAIAccountInRequestGroup(latest, groupID))) {
 		return nil, newOpenAIDispatchAccountUnavailableError(
 			openAIContinuationRestartRequired,
 			account.ID,
@@ -3274,6 +3274,9 @@ func (s *OpenAIGatewayService) hydrateSelectedAccount(ctx context.Context, accou
 
 func (s *OpenAIGatewayService) newSelectionResult(ctx context.Context, account *Account, acquired bool, release func(), waitPlan *AccountWaitPlan) (*AccountSelectionResult, error) {
 	hydrated, err := s.hydrateSelectedAccount(ctx, account)
+	if err == nil && !domesticAccountAllowed(ctx, hydrated) {
+		err = ErrNoAvailableAccounts
+	}
 	if err != nil {
 		if acquired && release != nil {
 			release()

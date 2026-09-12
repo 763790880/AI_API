@@ -42,6 +42,9 @@ func openAICompatibleRoutingPlatform(apiKey *service.APIKey) string {
 }
 
 func openAICompatibleRequestContext(ctx context.Context, apiKey *service.APIKey) context.Context {
+	if apiKey != nil && apiKey.Group != nil && apiKey.Group.Platform == service.PlatformDomestic {
+		return service.WithDomesticGroupRouting(ctx, apiKey.Group.ID)
+	}
 	routingPlatform := openAICompatibleRoutingPlatform(apiKey)
 	if routingPlatform != service.PlatformGrok && routingPlatform != service.PlatformOpencode {
 		return ctx
