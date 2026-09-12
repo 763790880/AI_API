@@ -167,7 +167,9 @@ func (s *PricingService) ListModelNamesByPlatform(platform string) []string {
 			match = provider == "grok" || provider == "xai"
 		}
 		if p == "opencode" {
-			match = provider == "openrouter" || provider == "opencode"
+			// OpenCode is a client/protocol platform and can expose models from
+			// multiple upstream providers; use every priced catalog model.
+			match = true
 		}
 		if match {
 			result = append(result, name)
