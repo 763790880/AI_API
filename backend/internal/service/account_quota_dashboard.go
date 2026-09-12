@@ -703,7 +703,9 @@ func accountSchedulableInQuotaGroup(account Account, now time.Time, groupStatus,
 	if groupStatus != "" && groupStatus != StatusActive {
 		return false
 	}
-	if groupPlatform != "" && account.Platform != groupPlatform {
+	// 第三方中转账号的 Platform 表示接口协议（通常为 openai），
+	// 实际路由平台由其绑定分组决定，因此不能用账号协议平台排除。
+	if groupPlatform != "" && account.Platform != groupPlatform && !isThirdPartyUpstreamAccount(&account) {
 		return false
 	}
 	if groupPlatform == PlatformOpenAI {
