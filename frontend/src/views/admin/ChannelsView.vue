@@ -763,6 +763,30 @@ function addPlatformSection(platform: GroupPlatform) {
     web_search_emulation: false,
     account_stats_pricing_rules: [],
   })
+  void loadPlatformCatalog(form.platforms.length - 1)
+}
+
+async function loadPlatformCatalog(sectionIdx: number) {
+  const section = form.platforms[sectionIdx]
+  if (!section || editingChannel.value || section.model_pricing.length > 0) return
+  try {
+    const { models } = await adminAPI.channels.getModelCatalog(section.platform)
+    if (form.platforms[sectionIdx] !== section || section.model_pricing.length > 0) return
+    for (const model of models) {
+      const entry = createPricingFormEntry({ longContextPricingEnabled: section.platform === 'openai' ? false : null })
+      entry.models = [model]
+      const pricing = await adminAPI.channels.getModelDefaultPricing(model)
+      if (pricing.found) Object.assign(entry, {
+        input_price: pricing.input_price ?? null, output_price: pricing.output_price ?? null,
+        cache_write_price: pricing.cache_write_price ?? null, cache_read_price: pricing.cache_read_price ?? null,
+        image_input_price: pricing.image_input_price ?? null, image_cache_read_price: pricing.image_cache_read_price ?? null,
+        image_output_price: pricing.image_output_price ?? null,
+      })
+      section.model_pricing.push(entry)
+    }
+  } catch (error) {
+    console.warn('加载平台模型目录失败', error)
+  }
 }
 
 function togglePlatform(platform: GroupPlatform) {

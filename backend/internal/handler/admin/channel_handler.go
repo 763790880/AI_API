@@ -614,3 +614,13 @@ func (h *ChannelHandler) GetModelDefaultPricing(c *gin.Context) {
 		"image_output_price":     pricing.ImageOutputPricePerToken,
 	})
 }
+
+// GetModelCatalog returns authoritative priced models for a platform.
+func (h *ChannelHandler) GetModelCatalog(c *gin.Context) {
+	platform := strings.TrimSpace(c.Query("platform"))
+	if platform == "" {
+		response.ErrorFrom(c, infraerrors.BadRequest("MISSING_PARAMETER", "platform parameter is required"))
+		return
+	}
+	response.Success(c, gin.H{"models": h.billingService.ListModelNamesByPlatform(platform)})
+}

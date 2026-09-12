@@ -186,6 +186,12 @@ export async function getModelDefaultPricing(model: string): Promise<ModelDefaul
   return data
 }
 
+export interface ModelCatalogResult { models: string[] }
+export async function getModelCatalog(platform: string): Promise<ModelCatalogResult> {
+  const { data } = await apiClient.get<ModelCatalogResult>('/admin/channels/model-catalog', { params: { platform } })
+  return data
+}
+
 export interface PricedModelOptionsResult {
   models: string[]
 }
@@ -202,5 +208,5 @@ export async function getPricedModelOptions(platforms?: string[]): Promise<Price
   return data
 }
 
-const channelsAPI = { list, getById, create, update, remove, getModelDefaultPricing, getPricedModelOptions }
+const channelsAPI = { list, getById, create, update, remove, getModelDefaultPricing, getModelCatalog, getPricedModelOptions }
 export default channelsAPI

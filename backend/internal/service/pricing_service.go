@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -145,6 +146,35 @@ type LiteLLMModelPricing struct {
 	SupportsPromptCaching               bool    `json:"supports_prompt_caching"`
 	OutputCostPerImage                  float64 `json:"output_cost_per_image"`       // 图片生成模型每张图片价格
 	OutputCostPerImageToken             float64 `json:"output_cost_per_image_token"` // 图片输出 token 价格
+}
+
+// ListModelNamesByPlatform returns models from the authoritative pricing catalog.
+func (s *PricingService) ListModelNamesByPlatform(platform string) []string {
+	if s == nil {
+		return []string{}
+	}
+	p := strings.ToLower(strings.TrimSpace(platform))
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	result := make([]string, 0)
+	for name, pricing := range s.pricingData {
+		provider := strings.ToLower(strings.TrimSpace(pricing.LiteLLMProvider))
+		match := provider == p
+		if p == "gemini" {
+			match = provider == "gemini" || provider == "google"
+		}
+		if p == "grok" {
+			match = provider == "grok" || provider == "xai"
+		}
+		if p == "opencode" {
+			match = provider == "openrouter" || provider == "opencode"
+		}
+		if match {
+			result = append(result, name)
+		}
+	}
+	sort.Strings(result)
+	return result
 }
 
 // PricingRemoteClient 远程价格数据获取接口

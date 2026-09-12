@@ -963,6 +963,14 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 	return nil, fmt.Errorf("%w for model: %s", ErrModelPricingUnavailable, model)
 }
 
+// ListModelNamesByPlatform lists catalog models for channel creation.
+func (s *BillingService) ListModelNamesByPlatform(platform string) []string {
+	if s == nil || s.pricingService == nil {
+		return []string{}
+	}
+	return s.pricingService.ListModelNamesByPlatform(platform)
+}
+
 // GetModelPricingWithChannel 获取模型定价，渠道配置的价格覆盖默认值
 // 仅覆盖渠道中非 nil 的价格字段，nil 字段使用默认定价
 func (s *BillingService) GetModelPricingWithChannel(model string, channelPricing *ChannelModelPricing) (*ModelPricing, error) {
