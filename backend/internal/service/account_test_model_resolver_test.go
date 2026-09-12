@@ -60,6 +60,21 @@ func TestResolveTestModels_OwnedAccountIntersection(t *testing.T) {
 	require.Equal(t, "grok-4.5", models[0].ID)
 }
 
+func TestResolveTestModels_ThirdPartyUsesBoundGroupPlatformPricing(t *testing.T) {
+	var queries []PricedModelQuery
+	catalog := &catalogStub{selectable: func(_ context.Context, query PricedModelQuery) ([]string, error) {
+		queries = append(queries, query)
+		return []string{"kiro-model"}, nil
+	}}
+	resolver := NewAccountTestModelResolver(catalog)
+	account := &Account{Platform: PlatformOpenAI, GroupIDs: []int64{42}, Extra: map[string]any{"account_source": "third_party"}}
+	models, err := resolver.ResolveTestModels(context.Background(), account)
+	require.NoError(t, err)
+	require.Len(t, models, 1)
+	require.Equal(t, "*", queries[0].Platform)
+	require.Equal(t, int64(42), *queries[0].GroupID)
+}
+
 func TestResolveTestModels_OwnedAccountWhitelistMissing(t *testing.T) {
 	catalog := &catalogStub{selectable: func(_ context.Context, _ PricedModelQuery) ([]string, error) {
 		return []string{"grok-4.5"}, nil

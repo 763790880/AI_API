@@ -163,6 +163,10 @@ func intersectModelIDLists(lists [][]string) []string {
 // resolveCatalogModelIDs 确定账号可用的定价目录（多 group 取并集，无 group 用平台全局）。
 func (r *AccountTestModelResolver) resolveCatalogModelIDs(ctx context.Context, account *Account) ([]string, error) {
 	platform := account.Platform
+	// 管理员添加的第三方中转账号可绑定任意平台分组；按绑定分组内全部平台定价求并集。
+	if isThirdPartyUpstreamAccount(account) {
+		platform = "*"
+	}
 	if len(account.GroupIDs) == 0 {
 		return r.catalog.ListSelectablePricedModelIDs(ctx, PricedModelQuery{Platform: platform})
 	}
@@ -184,6 +188,14 @@ func (r *AccountTestModelResolver) resolveCatalogModelIDs(ctx context.Context, a
 	}
 	sort.Strings(result)
 	return result, nil
+}
+
+func isThirdPartyUpstreamAccount(account *Account) bool {
+	if account == nil || account.Extra == nil {
+		return false
+	}
+	v, _ := account.Extra["account_source"].(string)
+	return strings.EqualFold(strings.TrimSpace(v), "third_party")
 }
 
 // resolveTestableModels 计算账号能力与定价目录的交集，输出具体模型 ID。

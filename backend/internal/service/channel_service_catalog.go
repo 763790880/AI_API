@@ -108,7 +108,7 @@ func collectScopedChannels(cache *channelCache, query PricedModelQuery) ([]*Chan
 			if !containsInt64(ch.GroupIDs, *query.GroupID) {
 				return nil, ErrPricedModelScopeMismatch
 			}
-			if gp := cache.groupPlatform[*query.GroupID]; gp != "" && normalizeCatalogPlatform(gp) != platform {
+			if gp := cache.groupPlatform[*query.GroupID]; gp != "" && platform != "*" && normalizeCatalogPlatform(gp) != platform {
 				return nil, ErrPricedModelScopeMismatch
 			}
 		}
@@ -120,7 +120,7 @@ func collectScopedChannels(cache *channelCache, query PricedModelQuery) ([]*Chan
 		if !ok || !ch.IsActive() {
 			return nil, nil
 		}
-		if gp := cache.groupPlatform[*query.GroupID]; gp != "" && normalizeCatalogPlatform(gp) != platform {
+		if gp := cache.groupPlatform[*query.GroupID]; gp != "" && platform != "*" && normalizeCatalogPlatform(gp) != platform {
 			return nil, ErrPricedModelScopeMismatch
 		}
 		return []*Channel{ch}, nil
@@ -145,7 +145,7 @@ func mergeChannelPricedModels(ch *Channel, platform string, query PricedModelQue
 
 	addPricing := func(pricing []ChannelModelPricing) {
 		for _, entry := range pricing {
-			if normalizeCatalogPlatform(entry.Platform) != platform {
+			if platform != "*" && normalizeCatalogPlatform(entry.Platform) != platform {
 				continue
 			}
 			for _, model := range entry.Models {
