@@ -341,12 +341,14 @@ func (s *AccountTestService) testOpencodeAccountConnection(c *gin.Context, accou
 	c.Writer.Flush()
 
 	// 候选模型：首选映射后的最终模型，遇模型级错误时按序 fallback。
+	// 连接测试本身是独立会话；同一次测试切换模型时复用，避免借用用户会话。
+	sessionID := uuid.NewString()
 	var lastStatus int
 	var lastBody string
 	for _, candidate := range candidates {
 		s.sendEvent(c, TestEvent{Type: "test_start", Model: candidate.ID})
 
-		status, body, probeErr := s.probeOpencodeModel(ctx, account, normalizedBaseURL, authToken, candidate)
+		status, body, probeErr := s.probeOpencodeModel(ctx, account, normalizedBaseURL, authToken, sessionID, candidate)
 		if probeErr != nil {
 			return s.sendErrorAndEnd(c, fmt.Sprintf("OpenCode request failed: %s", probeErr.Error()))
 		}
@@ -407,7 +409,7 @@ func resolveOpencodeTestCandidates(account *Account, modelID string) ([]Opencode
 
 // probeOpencodeModel 对 OpenCode Go 发起一次与模型协议匹配的非流式探测。
 // 返回 HTTP 状态码与响应体（body 截断到 2MB）；网络/请求错误通过 error 返回。
-func (s *AccountTestService) probeOpencodeModel(ctx context.Context, account *Account, baseURL, authToken string, spec OpencodeGoModelSpec) (int, []byte, error) {
+func (s *AccountTestService) probeOpencodeModel(ctx context.Context, account *Account, baseURL, authToken, sessionID string, spec OpencodeGoModelSpec) (int, []byte, error) {
 	const prompt = "Reply with the single word: OK"
 
 	var apiURL string
@@ -450,6 +452,7 @@ func (s *AccountTestService) probeOpencodeModel(ctx context.Context, account *Ac
 		return 0, nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-opencode-session", sessionID)
 	if spec.Protocol == OpencodeGoProtocolMessages {
 		req.Header.Set("x-api-key", authToken)
 		req.Header.Set("anthropic-version", "2023-06-01")

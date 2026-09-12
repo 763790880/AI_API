@@ -102,6 +102,9 @@ func (u *opencodeTestUpstream) DoWithTLS(req *http.Request, _ string, _ int64, _
 		header:  req.Header.Clone(),
 		payload: parsed,
 	})
+	if strings.TrimSpace(req.Header.Get("x-opencode-session")) == "" {
+		return newOpencodeErrorResponse(http.StatusBadRequest, `{"type":"error","error":{"type":"MissingSessionID","message":"Request is missing x-opencode-session"}}`), nil
+	}
 	if resp, ok := u.responses[model]; ok {
 		return resp, nil
 	}
@@ -233,6 +236,7 @@ func TestOpencodeAccountConnectionRoutesByFinalModelProtocol(t *testing.T) {
 			require.Equal(t, tt.path, request.path)
 			require.Equal(t, tt.upstreamModel, request.model)
 			require.Equal(t, false, request.payload["stream"])
+			require.NotEmpty(t, request.header.Get("x-opencode-session"))
 
 			if tt.wantBearer {
 				require.Equal(t, "Bearer opencode-secret", request.header.Get("Authorization"))
@@ -310,6 +314,33 @@ func TestOpencodeAccountConnectionFallsBackOnRegionError(t *testing.T) {
 		"should fall back from deepseek-v4-flash to gpt-5.6-luna on RegionError")
 	require.Equal(t, "/zen/go/v1/chat/completions", upstream.requests[0].path)
 	require.Equal(t, "/zen/go/v1/responses", upstream.requests[1].path)
+	require.NotEmpty(t, upstream.requests[0].header.Get("x-opencode-session"))
+	require.Equal(t, upstream.requests[0].header.Get("x-opencode-session"), upstream.requests[1].header.Get("x-opencode-session"),
+		"model fallback must remain in the same connection-test session")
+}
+
+func TestOpencodeAccountConnectionUsesIndependentProbeSessions(t *testing.T) {
+	t.Parallel()
+	account := &Account{
+		Platform:    PlatformOpencode,
+		Type:        AccountTypeAPIKey,
+		Credentials: map[string]any{"api_key": "opencode-secret"},
+	}
+	var sessions []string
+	for range 2 {
+		upstream := &opencodeTestUpstream{responses: map[string]*http.Response{
+			"deepseek-v4-flash": newOpencodeChatOKResponse(),
+		}}
+		c := opencodeTestGinContext(t)
+		c.Request.Header = http.Header{"X-Opencode-Session": []string{"browser-session"}}
+		require.NoError(t, newOpencodeTestService(upstream).testOpencodeAccountConnection(c, account, "deepseek-v4-flash"))
+		require.Len(t, upstream.requests, 1)
+		session := upstream.requests[0].header.Get("x-opencode-session")
+		require.NotEmpty(t, session)
+		require.NotEqual(t, "browser-session", session, "a probe must not reuse a browser conversation")
+		sessions = append(sessions, session)
+	}
+	require.NotEqual(t, sessions[0], sessions[1], "each test starts an independent conversation")
 }
 
 func TestOpencodeAccountConnectionNoFallbackOnAuthError(t *testing.T) {
