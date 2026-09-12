@@ -12,7 +12,7 @@ function setup() {
     props: { show: true, groups: [] },
     global: { stubs: {
       BaseDialog: { template: '<div><slot /><slot name="footer" /></div>' },
-      GroupSelector: { props: ['modelValue'], template: '<button data-test="group" @click="$emit(\'update:modelValue\', [7])">group</button>' }
+      GroupSelector: { props: ['modelValue', 'platform'], template: '<button data-test="group" :data-platform="platform" @click="$emit(\'update:modelValue\', [7])">group</button>' }
     } }
   })
 }
@@ -87,6 +87,11 @@ describe('third-party upstream account', () => {
       credentials: { base_url: 'https://relay.example.com', api_key: 'test-placeholder', model_mapping: { 'model-a': 'model-a', 'model-b': 'model-b' } }
     }))
     expect(wrapper.emitted('created')).toHaveLength(1)
+    wrapper.unmount()
+  })
+  it('does not filter groups by the upstream protocol', async () => {
+    const wrapper = setup()
+    expect(wrapper.get('[data-test="group"]').attributes('data-platform')).toBeUndefined()
     wrapper.unmount()
   })
   it('discards an old model response after credentials change', async () => {

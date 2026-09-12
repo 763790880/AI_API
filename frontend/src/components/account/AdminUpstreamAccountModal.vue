@@ -32,8 +32,8 @@
             </label>
           </div>
         </div>
-        <GroupSelector v-model="groupIDs" :groups="groups" :platform="platform" label="投放分组" />
-        <p class="input-hint">至少选择一个相同协议的分组，使账号可以参与调度。上游模型必须兼容所选协议；新增模型的售价请在渠道中配置。</p>
+        <GroupSelector v-model="groupIDs" :groups="groups" label="投放分组" />
+        <p class="input-hint">可选择任意分组，使账号参与对应分组的调度。接口协议仅决定请求格式；上游模型必须兼容所选协议，新增模型的售价请在渠道中配置。</p>
         <label class="block"><span class="input-label">最大并发</span>
           <input v-model.number="concurrency" name="upstream-concurrency" type="number" min="1" max="1000" required class="input" />
         </label>
