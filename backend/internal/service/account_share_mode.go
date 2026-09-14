@@ -5740,6 +5740,15 @@ func IsAccountShareModeOwnerSelfUse(membership *AccountShareMembership, listing 
 		membership.ConsumerUserID == listing.OwnerUserID
 }
 
+// IsAccountShareModeOrdinaryFallbackAccount reports whether an account is an
+// ordinary administrator account that may be selected when an authenticated
+// request targets an unbound public account-share group.  Billing must use the
+// same boundary as dispatch; room-backed and private accounts must remain
+// fail-closed.
+func IsAccountShareModeOrdinaryFallbackAccount(account *Account) bool {
+	return account != nil && account.OwnerUserID == nil && account.AccountShareModeListingID == nil
+}
+
 func (s *AccountShareModeService) String() string {
 	if s == nil {
 		return "AccountShareModeService<nil>"

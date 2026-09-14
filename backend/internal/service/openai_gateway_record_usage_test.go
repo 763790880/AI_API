@@ -499,6 +499,38 @@ func TestOpenAIGatewayServiceRecordUsage_AccountShareOwnerSelfUseUsesServiceRate
 	require.InDelta(t, expected.ActualCost, billingRepo.lastCmd.BalanceCost, 1e-12)
 }
 
+func TestOpenAIGatewayServiceRecordUsage_UnboundModeGroupBillsOrdinaryFallbackAccount(t *testing.T) {
+	groupID := int64(15)
+	apiKeyID := int64(1005)
+	accountID := int64(3005)
+	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
+	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
+	userRepo := &openAIRecordUsageUserRepoStub{}
+	subRepo := &openAIRecordUsageSubRepoStub{}
+	svc := newOpenAIRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, userRepo, subRepo, nil)
+	svc.accountShareModeService = &AccountShareModeService{repo: &accountShareModeRepoStub{}}
+
+	err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
+		Result: &OpenAIForwardResult{
+			RequestID: "resp_account_share_unbound_fallback",
+			Usage:     OpenAIUsage{InputTokens: 20, OutputTokens: 10},
+			Model:     "gpt-5.1",
+			Duration:  time.Second,
+		},
+		APIKey: &APIKey{
+			ID:      apiKeyID,
+			GroupID: i64p(groupID),
+			Group:   &Group{ID: groupID, RateMultiplier: 1},
+		},
+		User:    &User{ID: 2005},
+		Account: &Account{ID: accountID, Platform: PlatformOpenAI, Type: AccountTypeOAuth},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, usageRepo.lastLog)
+	require.NotNil(t, billingRepo.lastCmd)
+}
+
 func TestOpenAIGatewayServiceRecordUsage_DuplicateUsageLogSkipsBilling(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{inserted: false}
 	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: false}}

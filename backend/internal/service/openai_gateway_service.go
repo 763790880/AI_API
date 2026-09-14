@@ -8950,7 +8950,15 @@ func (s *OpenAIGatewayService) recordUsageOnce(ctx context.Context, input *OpenA
 		var err error
 		accountShareMembership, accountShareListing, err = s.accountShareModeService.ResolveActiveBindingForRequest(ctx, user.ID, apiKey.ID, *apiKey.GroupID)
 		if err != nil {
-			return err
+			if errors.Is(err, ErrAccountShareModeGroupUnbound) && IsAccountShareModeOrdinaryFallbackAccount(account) {
+				// Dispatch deliberately falls back to ordinary administrator accounts
+				// for authenticated keys without a room binding. Keep billing aligned
+				// with that decision while preserving fail-closed room/private checks.
+				accountShareMembership = nil
+				accountShareListing = nil
+			} else {
+				return err
+			}
 		}
 		if accountShareListing != nil && accountShareListing.AccountID != account.ID {
 			return ErrNoAvailableAccounts

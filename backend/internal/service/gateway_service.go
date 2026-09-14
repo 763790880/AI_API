@@ -10590,7 +10590,14 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 		var err error
 		accountShareMembership, accountShareListing, err = s.accountShareModeService.ResolveActiveBindingForRequest(ctx, user.ID, apiKey.ID, *apiKey.GroupID)
 		if err != nil {
-			return err
+			if errors.Is(err, ErrAccountShareModeGroupUnbound) && IsAccountShareModeOrdinaryFallbackAccount(account) {
+				// Keep generic gateway billing consistent with dispatch fallback for
+				// authenticated, unbound public-group requests.
+				accountShareMembership = nil
+				accountShareListing = nil
+			} else {
+				return err
+			}
 		}
 		if accountShareListing != nil && accountShareListing.AccountID != account.ID {
 			return ErrNoAvailableAccounts
